@@ -73,7 +73,7 @@ You can test the hooks with real-world applications that use the hooked system c
 An example with `ssh-add`:
 
 ```bash
-$ LD_PRELOAD=/home/totekuh/tools/function-hooks/lib/connect.so ssh-add -l
+$ LD_PRELOAD=/tmp/connect.so ssh-add -l
 [ :::::::::::::: Start of connect Hook :::::::::::::: ]
 HOOK: connect hooked!
 HOOK: Call stack:
