@@ -1,4 +1,4 @@
-# Hooking Library Project
+# Description
 
 This project provides a dynamically linked shared library that hooks into various system calls and functions to log or
 alter their behavior.
