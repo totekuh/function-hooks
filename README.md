@@ -1,47 +1,48 @@
-# Description
+## Description
 
-This project provides a dynamically linked shared library that hooks into various system calls and functions to log or
-alter their behavior.
+This project provides a dynamically linked shared library designed to hook into various system calls and functions for
+logging or altering their behavior.
+It is particularly useful for security research, debugging, and monitoring system interactions.
 
 ## Hooks
 
+Currently, the library provides hooks for the following system calls and functions:
+
 - `recvmsg`: Logs and monitors the `recvmsg` system call.
-    - **Context**: The `recvmsg` system call is used for receiving messages from a socket, and may be used to receive
-      data on a socket.
+    - **Context**: Commonly used in TCP/IP networking to receive messages from a socket.
 - `recvfrom`: Logs and monitors the `recvfrom` system call.
-    - **Context**: The `recvfrom` system call is used to receive messages from a socket, and may be used to receive data
-      on a socket. It is generally used with UDP sockets.
+    - **Context**: Generally used with UDP sockets to receive messages from a socket.
 - `memcpy`: Logs and monitors the `memcpy` function.
-    - **Context**: The `memcpy` function is a standard library function that copies `n` bytes from the object pointed to
-      by `src` to the object pointed to by `dest`.
+    - **Context**: Standard library function for memory copying.
+- `connect`: Logs and monitors the `connect` system call.
+    - **Context**: Used for establishing a connection to a network service, logs the socket type and destination.
 
 ## Building
 
-To build the project, run the following command:
+To build the project, navigate to the project directory and run:
 
 ```bash
 make
 ```
 
-This will generate a dynamically linked shared object file `hooks.so` inside the `./lib` directory.
+This will generate a `.so` (shared object) file for each hook and a `hooks.so` file containing all hooks, located in
+the `./lib` directory.
 
 ## Usage
 
-To use all the hooks, you'll need to set the `LD_PRELOAD` environment variable to the path of the `hooks.so` file. This
-will instruct the loader to load this shared object before any other.
+To use all the hooks, set the `LD_PRELOAD` environment variable to the path of the `hooks.so` file:
 
 ```bash
 export LD_PRELOAD=./lib/hooks.so
 ```
 
-If you wish to use just one specific hook, you can set `LD_PRELOAD` to the path of that individual `.so` file instead.
-For example, to use only the `memcpy` hook:
+To use a specific hook, set `LD_PRELOAD` to the path of that individual `.so` file. For example, for `memcpy`:
 
 ```bash
 export LD_PRELOAD=./lib/memcpy.so
 ```
 
-After setting `LD_PRELOAD`, any new processes you start from the same shell will have the specified hooks enabled.
+After setting `LD_PRELOAD`, any new processes you start from the same shell will have the hooks enabled.
 
 ## Running Tests
 
@@ -55,8 +56,16 @@ If all tests pass, you will see a green "All tests passed" message.
 
 ## Cleaning Up
 
-To remove all compiled files, including test executables, run:
+To remove all compiled files and test executables, run:
 
 ```bash
 make clean
 ```
+
+### Testing with Real-world Applications
+
+You can test the hooks with real-world applications that use the hooked system calls. For example:
+
+- Use `curl` to test `recvmsg` and `connect` hooks.
+- Use `ssh` or `ssh-agent` to test `recvfrom` hooks.
+- Use `docker` commands to test `connect` hooks with Unix Domain Sockets.
