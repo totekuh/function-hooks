@@ -77,7 +77,7 @@ $ LD_PRELOAD=/tmp/connect.so ssh-add -l
 [ :::::::::::::: Start of connect Hook :::::::::::::: ]
 HOOK: connect hooked!
 HOOK: Call stack:
-  ./lib/connect.so(connect+0x5f) [0x7f13a5041238]
+  /tmp/connect.so(connect+0x5f) [0x7f13a5041238]
   ssh-add(+0x1ea96) [0x55a03828ea96]
   ssh-add(+0x8318) [0x55a038278318]
   /lib/x86_64-linux-gnu/libc.so.6(+0x276ca) [0x7f13a48456ca]
