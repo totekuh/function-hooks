@@ -69,3 +69,22 @@ You can test the hooks with real-world applications that use the hooked system c
 - Use `curl` to test `recvmsg` and `connect` hooks.
 - Use `ssh` or `ssh-agent` to test `recvfrom` hooks.
 - Use `docker` commands to test `connect` hooks with Unix Domain Sockets.
+
+An example with `ssh-add`:
+
+```bash
+$ LD_PRELOAD=/home/totekuh/tools/function-hooks/lib/connect.so ssh-add -l
+[ :::::::::::::: Start of connect Hook :::::::::::::: ]
+HOOK: connect hooked!
+HOOK: Call stack:
+  ./lib/connect.so(connect+0x5f) [0x7f13a5041238]
+  ssh-add(+0x1ea96) [0x55a03828ea96]
+  ssh-add(+0x8318) [0x55a038278318]
+  /lib/x86_64-linux-gnu/libc.so.6(+0x276ca) [0x7f13a48456ca]
+  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f13a4845785]
+  ssh-add(+0x9581) [0x55a038279581]
+HOOK: Connecting to UNIX socket: /tmp/ssh-S7fw3AkAWHr1/agent.708428
+HOOK: Connection successful.
+[ :::::::::::::: End of connect Hook :::::::::::::: ]
+The agent has no identities.
+```
