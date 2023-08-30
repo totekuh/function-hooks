@@ -44,6 +44,21 @@ export LD_PRELOAD=./lib/memcpy.so
 
 After setting `LD_PRELOAD`, any new processes you start from the same shell will have the hooks enabled.
 
+### memcpy Hook
+
+The `memcpy` hook offers the following environment variables that users can utilize to further control its behaviors:
+
+- `BREAK`: When set to `1`, this variable enables a pause in the hook code, allowing the program to halt and wait for user input after specific logging operations. This can be useful for detailed inspection and analysis.
+- `EGG`: Setting the `EGG` variable to a specific string will prompt the hook to log and match instances where that string is found in the source or destination memory during `memcpy` operations.
+
+Example of using `BREAK` and `EGG` with the `memcpy` hook:
+
+```bash
+export BREAK=1  # Enable pausing
+export EGG="password"  # Log when the word "secret" is found during memcpy
+export LD_PRELOAD=./lib/memcpy.so  # Load the memcpy hook
+```
+
 ## Running Tests
 
 To run the tests, execute:
