@@ -1,10 +1,14 @@
 CC = gcc
 CFLAGS = -Wall -fPIC
-LDFLAGS = -shared
+LDFLAGS = -shared -ldl
 SRC_DIR = ./src
 LIB_DIR = ./lib
 
-all: $(LIB_DIR)/hooks.so $(LIB_DIR)/recvmsg.so $(LIB_DIR)/recvfrom.so $(LIB_DIR)/memcpy.so $(LIB_DIR)/connect.so
+all:
+	mkdir -p $(LIB_DIR) # Automatically create lib directory
+	$(MAKE) hooks
+
+hooks: $(LIB_DIR)/hooks.so $(LIB_DIR)/recvmsg.so $(LIB_DIR)/recvfrom.so $(LIB_DIR)/memcpy.so $(LIB_DIR)/connect.so
 
 $(LIB_DIR)/common.o: $(SRC_DIR)/common.c $(SRC_DIR)/common.h
 	$(CC) $(CFLAGS) -c $< -o $@
