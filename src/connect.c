@@ -1,8 +1,12 @@
+#define _GNU_SOURCE
+#include <dlfcn.h>
 #include "common.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
+#include <errno.h>
+
 
 static int (*original_connect)(int sockfd, const struct sockaddr *addr, socklen_t addrlen) = NULL;
 
@@ -39,7 +43,12 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     if (ret == 0) {
         printf("HOOK: Connection successful.\n");
     } else {
-        printf("HOOK: Connection failed.\n");
+        // Check the errno value
+        if (errno == EINPROGRESS) {
+            printf("HOOK: Connection in progress (non-blocking).\n");
+        } else {
+            printf("HOOK: Connection failed, errno: %d.\n", errno);
+        }
     }
 
     printf("[ :::::::::::::: End of connect Hook :::::::::::::: ]\n");

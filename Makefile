@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -fPIC
+CFLAGS = -Wall -fPIC -D_GNU_SOURCE
 LDFLAGS = -shared -ldl
 SRC_DIR = ./src
 LIB_DIR = ./lib
