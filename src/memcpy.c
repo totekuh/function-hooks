@@ -1,11 +1,14 @@
+#define _GNU_SOURCE // Enable GNU extensions
+#include <dlfcn.h>  // Must come after _GNU_SOURCE
 #include "common.h"
 #include <string.h>
-#include <stdlib.h> // for getenv
-#include <signal.h> // for raise
+#include <stdlib.h>
+#include <signal.h>
 
 static void *(*original_memcpy)(void *dest, const void *src, size_t n) = NULL;
 
-int BREAK = 0; // Set to 1 to pause, 0 to continue (disabled by default)
+// Note: Changed BREAK to an integer type, because getenv() returns a string.
+int BREAK = 0;
 
 // Function to log content
 void log_content(const void *data, size_t size, const char *description) {
@@ -38,6 +41,7 @@ void *memcpy(void *dest, const void *src, size_t n) {
     printf("[ :::::::::::::: Start of memcpy Hook :::::::::::::: ]\n");
 
     printf("HOOK: memcpy hooked!\n");
+    log_memcpy_arguments(dest, src, n);
 
     // Check for EGG in source or destination
     int egg_found = 0;
@@ -47,13 +51,11 @@ void *memcpy(void *dest, const void *src, size_t n) {
             egg_found = 1;
             printf("HOOK: EGG found!\n");
             print_call_stack();
-            log_memcpy_arguments(dest, src, n);
             log_content(dest, n, "Destination content before copying");
             log_content(src, n, "Content being copied from source");
         }
     } else {
         print_call_stack();
-        log_memcpy_arguments(dest, src, n);
         log_content(dest, n, "Destination content before copying");
         log_content(src, n, "Content being copied from source");
     }

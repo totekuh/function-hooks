@@ -1,3 +1,5 @@
+#define _GNU_SOURCE // Enable GNU extensions
+#include <dlfcn.h>  // Must come after _GNU_SOURCE
 #include "common.h"
 #include <sys/socket.h>
 

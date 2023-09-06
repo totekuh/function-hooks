@@ -1,26 +1,14 @@
+#define _GNU_SOURCE // Enable GNU extensions
 #include "common.h"
 #include <stdio.h>
-
-#ifdef __unix__
-#include <sys/socket.h>
 #include <dlfcn.h>
-#elif defined(_WIN32)
-// Include Windows-specific headers
-#endif
+#include <sys/socket.h>
 
 static ssize_t (*original_recvmsg)(int sockfd, struct msghdr *msg, int flags) = NULL;
 
 ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
     if (!original_recvmsg) {
-#ifdef __gnu_linux__
         original_recvmsg = dlsym(RTLD_NEXT, "recvmsg");
-#elif defined(_YOUR_OTHER_PLATFORM_MACRO_)
-        // Use platform-specific logic to initialize original_recvmsg
-#else
-        // Graceful fallback or warning
-        fprintf(stderr, "Warning: recvmsg hook not supported on this platform.\n");
-        return -1;
-#endif
     }
 
     printf("[ :::::::::::::: Start of recvmsg Hook :::::::::::::: ]\n");
