@@ -19,7 +19,6 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 
     // Log the hook
     printf("HOOK: connect hooked!\n");
-    print_call_stack();
 
     // Log the address and port being connected to based on the socket family
     if (addr->sa_family == AF_INET) {

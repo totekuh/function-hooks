@@ -1,7 +1,7 @@
 ## Description
 
-This project provides a dynamically linked shared library designed to hook into various system calls and functions for
-logging or altering their behavior.
+This project provides a dynamically linked shared library designed to hook into various system calls and functions for logging or altering their behavior.
+
 It is particularly useful for security research, debugging, and monitoring system interactions.
 
 ## Hooks
@@ -16,6 +16,9 @@ Currently, the library provides hooks for the following system calls and functio
     - **Context**: Standard library function for memory copying.
 - `connect`: Logs and monitors the `connect` system call.
     - **Context**: Used for establishing a connection to a network service, logs the socket type and destination.
+- `getenv`: Logs and monitors the `getenv` function.
+  - **Context**: Standard library function for fetching environment variables, logs the variable name and its value if it exists.
+
 
 ## Building
 
@@ -58,6 +61,11 @@ export BREAK=1  # Enable pausing
 export EGG="password"  # Log when the word "secret" is found during memcpy
 export LD_PRELOAD=./lib/memcpy.so  # Load the memcpy hook
 ```
+
+### getenv Hook
+
+The `getenv` hook logs whenever the `getenv` function is called. It will log the name of the environment variable being fetched and its value if it exists.
+
 
 ## Running Tests
 
@@ -103,3 +111,23 @@ HOOK: Connection successful.
 [ :::::::::::::: End of connect Hook :::::::::::::: ]
 The agent has no identities.
 ```
+
+## Building for Different Architectures
+
+This project can be configured to build shared libraries compatible with different architectures. The configuration options are available through a menu-driven interface, which can be accessed by running:
+
+```bash
+make menuconfig
+```
+
+### Configuring the Build
+
+The make menuconfig command will execute the config.sh script and present you with a menu to choose the architecture for which you want to build the hooks. The available options are:
+
+- **x86_64**: For 64-bit x86 CPUs
+- **x86**: For 32-bit x86 CPUs
+- **ARM64**: For 64-bit ARM CPUs
+- **ARM**: For 32-bit ARM CPUs
+- **ARMHF**: For ARM CPUs with hardware floating-point support
+
+The script will also check and install any missing dependencies required for the chosen architecture.
