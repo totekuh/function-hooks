@@ -1,2 +1,0 @@
-ARCH=x86_64
-CFLAGS=-Wall -fPIC
