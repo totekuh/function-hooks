@@ -10,6 +10,8 @@ check_dependencies() {
         packages+=("gcc-aarch64-linux-gnu" "g++-aarch64-linux-gnu")
     elif [ "$1" == "ARM" ]; then
         packages+=("gcc-arm-linux-gnueabi" "g++-arm-linux-gnueabi")
+    elif [ "$1" == "ARMHF" ]; then
+            packages+=("gcc-arm-linux-gnueabihf" "g++-arm-linux-gnueabihf")
     elif [ "$1" == "x86" ]; then
         packages+=("gcc-multilib" "g++-multilib")
     fi
@@ -36,7 +38,8 @@ MENU="Choose the architecture:"
 OPTIONS=(1 "x86_64"
          2 "x86"
          3 "ARM64"
-         4 "ARM")
+         4 "ARM"
+         5 "ARMHF")
 
 CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
@@ -70,6 +73,12 @@ case $CHOICE in
         check_dependencies "ARM"
         echo "ARCH=ARM" > config.mk
         echo "CROSS_COMPILE=arm-linux-gnueabi-" >> config.mk
+        echo "CFLAGS=-Wall -fPIC" >> config.mk
+        ;;
+    5)
+        check_dependencies "ARMHF"
+        echo "ARCH=ARM" > config.mk
+        echo "CROSS_COMPILE=arm-linux-gnueabihf-" >> config.mk
         echo "CFLAGS=-Wall -fPIC" >> config.mk
         ;;
 esac
