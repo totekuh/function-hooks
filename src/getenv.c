@@ -20,11 +20,7 @@ char *getenv(const char *name) {
     printf("HOOK: getenv hooked!\n");
 
     // Log the name of the environment variable being fetched
-    if (name) {
-        printf("HOOK: Fetching environment variable: %s\n", name);
-    } else {
-        printf("HOOK: Fetching environment variable: NULL\n");
-    }
+    printf("HOOK: Fetching environment variable: %s\n", name);
 
     char *ld_preload_var_name = "LD_PRELOAD";
     if (strcmp(name, ld_preload_var_name) == 0) {

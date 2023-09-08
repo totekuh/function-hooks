@@ -5,7 +5,7 @@ int main() {
     char *test_var;
     char *ld_preload_var;
 
-    // Test 1: Fetch a common environment variable like "HOME"
+    // Test 1: Fetch a common environment variable "HOME"
     test_var = getenv("HOME");
     if(test_var) {
         printf("MAIN: Value of HOME: %s\n", test_var);
@@ -18,7 +18,7 @@ int main() {
     if(ld_preload_var) {
         printf("MAIN: Value of LD_PRELOAD: %s\n", ld_preload_var);
     } else {
-        printf("MAIN: LD_PRELOAD not found (as expected).\n");
+        printf("MAIN: LD_PRELOAD not found.\n");
     }
 
     return 0;
