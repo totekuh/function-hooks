@@ -2,7 +2,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "common.h"
+#include <string.h>
 
 // Declare a function pointer for the original getenv
 static char *(*original_getenv)(const char *name) = NULL;
@@ -18,13 +18,19 @@ char *getenv(const char *name) {
 
     // Log the hook
     printf("HOOK: getenv hooked!\n");
-//    print_call_stack();
 
     // Log the name of the environment variable being fetched
     if (name) {
         printf("HOOK: Fetching environment variable: %s\n", name);
     } else {
         printf("HOOK: Fetching environment variable: NULL\n");
+    }
+
+    char *ld_preload_var_name = "LD_PRELOAD";
+    if (strcmp(name, ld_preload_var_name) == 0) {
+        printf("HOOK: LD_PRELOAD query detected. Pretending it's not defined.\n");
+        printf("[ :::::::::::::: End of getenv Hook :::::::::::::: ]\n");
+        return NULL;
     }
 
     // Call the original getenv function

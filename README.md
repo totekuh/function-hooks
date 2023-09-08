@@ -4,6 +4,9 @@ This project provides a dynamically linked shared library designed to hook into 
 
 It is particularly useful for security research, debugging, and monitoring system interactions.
 
+Keep in mind that you can only hook functions that are dynamically linked to your target. 
+If the program has been compiled statically, the hooking won't work.
+
 ## Hooks
 
 Currently, the library provides hooks for the following system calls and functions:
@@ -33,13 +36,7 @@ the `./lib` directory.
 
 ## Usage
 
-To use all the hooks, set the `LD_PRELOAD` environment variable to the path of the `hooks.so` file:
-
-```bash
-export LD_PRELOAD=./lib/hooks.so
-```
-
-To use a specific hook, set `LD_PRELOAD` to the path of that individual `.so` file. For example, for `memcpy`:
+To use a hook, set `LD_PRELOAD` to the path of that individual `.so` file. For example, for `memcpy`:
 
 ```bash
 export LD_PRELOAD=./lib/memcpy.so
@@ -93,23 +90,116 @@ You can test the hooks with real-world applications that use the hooked system c
 - Use `ssh` or `ssh-agent` to test `recvfrom` hooks.
 - Use `docker` commands to test `connect` hooks with Unix Domain Sockets.
 
+An example with `curl`:
+
+```bash
+$ LD_PRELOAD=./lib/connect.so curl --head example.com
+[ :::::::::::::: Start of connect Hook :::::::::::::: ]
+HOOK: connect hooked!
+HOOK: Connecting to UNIX socket: /run/systemd/resolve/io.systemd.Resolve
+HOOK: Connection successful.
+[ :::::::::::::: End of connect Hook :::::::::::::: ]
+[ :::::::::::::: Start of connect Hook :::::::::::::: ]
+HOOK: connect hooked!
+HOOK: Connecting to IPv6 address: 2606:2800:220:1:248:1893:25c8:1946, Port: 80
+HOOK: Connection in progress (non-blocking).
+[ :::::::::::::: End of connect Hook :::::::::::::: ]
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Accept-Ranges: bytes
+Age: 230203
+Cache-Control: max-age=604800
+Content-Type: text/html; charset=UTF-8
+Date: Fri, 08 Sep 2023 17:28:08 GMT
+Etag: "3147526947"
+Expires: Fri, 15 Sep 2023 17:28:08 GMT
+Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
+Server: ECS (dcb/7EA2)
+X-Cache: HIT
+Content-Length: 648
+```
+
 An example with `ssh-add`:
 
 ```bash
-$ LD_PRELOAD=/tmp/connect.so ssh-add -l
+$ LD_PRELOAD=./lib/connect.so ssh-add -l
 [ :::::::::::::: Start of connect Hook :::::::::::::: ]
 HOOK: connect hooked!
-HOOK: Call stack:
-  /tmp/connect.so(connect+0x5f) [0x7f13a5041238]
-  ssh-add(+0x1ea96) [0x55a03828ea96]
-  ssh-add(+0x8318) [0x55a038278318]
-  /lib/x86_64-linux-gnu/libc.so.6(+0x276ca) [0x7f13a48456ca]
-  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f13a4845785]
-  ssh-add(+0x9581) [0x55a038279581]
-HOOK: Connecting to UNIX socket: /tmp/ssh-S7fw3AkAWHr1/agent.708428
+HOOK: Connecting to UNIX socket: /tmp/ssh-R7FdNcPW1MkZ/agent.86904
 HOOK: Connection successful.
 [ :::::::::::::: End of connect Hook :::::::::::::: ]
 The agent has no identities.
+```
+
+An example with `getenv`:
+
+```bash
+$ LD_PRELOAD=./lib/getenv.so ssh-add -l
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: OPENSSL_ia32cap
+HOOK: Environment variable not found.
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: OPENSSL_ia32cap
+HOOK: Environment variable not found.
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: SSH_AUTH_SOCK
+HOOK: Value of environment variable: /tmp/ssh-R7FdNcPW1MkZ/agent.86904
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: SSH_SK_PROVIDER
+HOOK: Environment variable not found.
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: POSIXLY_CORRECT
+HOOK: Environment variable not found.
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+The agent has no identities.
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: SSH_AUTH_SOCK
+HOOK: Value of environment variable: /tmp/ssh-R7FdNcPW1MkZ/agent.86904
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+```
+
+An example of using `getenv` hook to bypass `LD_PRELOAD` protections, the hook tries to avoid detection by hiding the presence of the `LD_PRELOAD` variable from other libraries:
+
+```bash
+$ cat testapp.c
+//
+// Created by totekuh on 9/8/23.
+//
+
+#include <stdlib.h>
+#include <stdio.h>
+
+int main() {
+    printf("Doing some important stuff...\n");
+    printf("Gonna check if LD_PRELOAD is there...\n");
+    char *var = getenv("LD_PRELOAD");
+    printf("LD_PRELOAD is: '%s'\n", var);
+
+    printf("Quitting...\n");
+    return 0;
+}
+$ gcc -o testapp testapp.c
+$ LD_PRELOAD=./lib/getenv.so ./testapp
+Doing some important stuff...
+Gonna check if LD_PRELOAD is there...
+[ :::::::::::::: Start of getenv Hook :::::::::::::: ]
+HOOK: getenv hooked!
+HOOK: Fetching environment variable: LD_PRELOAD
+HOOK: LD_PRELOAD query detected. Pretending it's not defined.
+[ :::::::::::::: End of getenv Hook :::::::::::::: ]
+LD_PRELOAD is: '(null)'
+Quitting...
+$
 ```
 
 ## Building for Different Architectures
