@@ -13,9 +13,13 @@ OBJ_FILES = $(SRC_FILES:.c=.o)
 # Create corresponding .so filenames in LIB_DIR
 SO_FILES = $(patsubst $(SRC_DIR)/%.c,$(LIB_DIR)/%.so,$(SRC_FILES))
 
+# Define linker flags variable based on CUSTOM_LIB_PATH
+LDFLAGS := $(if $(CUSTOM_LIB_PATH),-L$(CUSTOM_LIB_PATH),)
+
 .PHONY: all menuconfig clean
 
 all: $(SO_FILES)
+
 
 # Compile common.c into common.o
 $(SRC_DIR)/common.o: $(SRC_DIR)/common.c
@@ -24,11 +28,12 @@ $(SRC_DIR)/common.o: $(SRC_DIR)/common.c
 # Rule to make each .so file, also linking in common.o
 $(SO_FILES): $(LIB_DIR)/%.so : $(SRC_DIR)/%.o $(SRC_DIR)/common.o
 	mkdir -p $(LIB_DIR)
-	$(CC) $(CFLAGS) -shared -fPIC -o $@ $^ -ldl
+	$(CC) $(CFLAGS) -static-libgcc -shared -fPIC -o $@ $^ $(LDFLAGS) -ldl
 
 # Generic rule for building object files
 $(OBJ_FILES): %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
 
 menuconfig:
 	./config.sh

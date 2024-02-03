@@ -51,6 +51,17 @@ CHOICE=$(dialog --clear \
 
 clear
 
+
+# Dialog for custom library path input
+LIB_PATH=$(dialog --title "Custom Library Path" \
+                  --inputbox "Enter the custom library path or leave empty to use system libraries:" \
+                  $HEIGHT \
+                  $WIDTH \
+                  3>&2 2>&1 1>&3)
+
+# Close the dialog box
+clear
+
 # Generate config.mk based on user input
 case $CHOICE in
     1)
@@ -82,3 +93,11 @@ case $CHOICE in
         echo "CFLAGS=-Wall -fPIC" >> config.mk
         ;;
 esac
+
+
+# Append the custom library path to config.mk if provided
+if [ -n "$LIB_PATH" ]; then
+    echo "CUSTOM_LIB_PATH=$LIB_PATH" >> config.mk
+else
+    echo "CUSTOM_LIB_PATH=" >> config.mk
+fi
